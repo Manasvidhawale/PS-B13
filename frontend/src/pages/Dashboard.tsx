@@ -6,50 +6,48 @@ import { SectionGrid }     from '../components/dashboard/SectionGrid'
 import { FeederMap }       from '../components/map/FeederMap'
 import { AlertPanel }      from '../components/dashboard/AlertPanel'
 import { SensorTimeSeries } from '../components/dashboard/SensorTimeSeries'
-import { SHAPChart }       from '../components/analysis/SHAPChart'
 import { SwitchingGuide }  from '../components/restoration/SwitchingGuide'
-import { TerraShieldPanel } from '../components/terrashield/TerraShieldPanel'
-import { ComplaintsFeed }  from '../components/complaints/ComplaintsFeed'
+import { ComplaintsSummaryCard } from '../components/complaints/ComplaintsSummaryCard'
+import { GridHealthOverviewCard } from '../components/dashboard/GridHealthOverviewCard'
 import { useGridStore }    from '../store/gridStore'
 
 export default function Dashboard() {
-  // Mount all live data hooks here
   useWebSocket()
   useFaultData()
   useTerraShield()
 
-  const { activeAlert } = useGridStore()
-  const activeSectionId = activeAlert?.section_id ?? 3
+  const { selectedSectionId } = useGridStore()
 
   return (
-    <div className="flex flex-col h-full overflow-hidden">
+    <div className="flex flex-col h-full overflow-y-auto bg-[#080d1a]">
       <Header title="Operator Dashboard" />
 
-      <div className="flex-1 overflow-y-auto p-4 space-y-4">
-        {/* Section Status Strip */}
-        <SectionGrid />
+      <div className="flex-1 p-5 space-y-5">
 
-        {/* Main Content */}
-        <div className="grid grid-cols-5 gap-4">
-          {/* Left — Map + Alerts */}
-          <div className="col-span-3 space-y-4">
+        {/* ── Top: Feeder Section Status Cards ─────────────────── */}
+        <section>
+          <SectionGrid />
+        </section>
+
+        {/* ── Main Dashboard: Balanced 6:6 Equal-Height Columns ─── */}
+        <section className="grid grid-cols-1 lg:grid-cols-12 gap-5 items-stretch">
+
+          {/* Left Column (6 cols): Map -> Live Telemetry -> Fault Alerts */}
+          <div className="lg:col-span-6 flex flex-col gap-5">
             <FeederMap />
-            <div className="grid grid-cols-2 gap-4">
-              <AlertPanel />
-              <ComplaintsFeed />
-            </div>
+            <SensorTimeSeries sectionId={selectedSectionId} />
+            <AlertPanel />
           </div>
 
-          {/* Right — Live Data + AI + Restoration */}
-          <div className="col-span-2 space-y-4">
-            <SensorTimeSeries sectionId={activeSectionId} />
-            <SHAPChart />
+          {/* Right Column (6 cols): Grid Overview -> Restoration Plan -> Consumer Complaints Summary */}
+          <div className="lg:col-span-6 flex flex-col gap-5">
+            <GridHealthOverviewCard />
             <SwitchingGuide />
+            <ComplaintsSummaryCard />
           </div>
-        </div>
 
-        {/* TerraShield Panel */}
-        <TerraShieldPanel />
+        </section>
+
       </div>
     </div>
   )
